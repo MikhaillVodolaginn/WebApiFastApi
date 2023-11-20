@@ -1,58 +1,66 @@
-from fastapi import FastAPI
-
-app = FastAPI()
+from fastapi import FastAPI, Request
 
 
-response = {
-  "args": {},
-  "data": "",
-  "files": {},
-  "form": {},
-  "headers": {
-    "Accept": "application/json",
-    "Accept-Encoding": "gzip, deflate",
-    "Accept-Language": "ru",
-    "Content-Length": "0",
-    "Host": "httpbin.org",
-    "Origin": "http://httpbin.org",
-    "Referer": "http://httpbin.org/",
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
-    "X-Amzn-Trace-Id": "Root=1-655ba4d3-4283502f613f4d6545ef2801"
-  },
-  "json": None,
-  "origin": "95.26.71.223",
-  "url": "http://httpbin.org/get"
-}
+tags_metadata = [
+    {
+        "name": "HTTP Methods",
+        "description": "Testing different HTTP verbs",
+    },
+    {
+        "name": "Request Inspection",
+        "description": "Inspect the request data",
+    },
+]
+
+app = FastAPI(openapi_tags=tags_metadata)
 
 
-@app.delete("/delete")
-async def the_requests_delete_parameters():
-    response["url"] = "http://httpbin.org/delete"
+def fill_response(request: Request):
+    response = {"args": {}, "data": "", "files": {}, "form": {}, 'headers': request.headers,
+                'json': None, 'origin': request.client.host, 'url': request.url._url}
 
     return response
 
 
-@app.get("/get")
-async def the_requests_query_parameters():
+@app.delete("/delete", tags=['HTTP Methods'])
+async def the_requests_delete_parameters(request: Request):
+    response = fill_response(request)
     return response
 
 
-@app.patch("/patch")
-async def the_requests_patch_parameters():
-    response["url"] = "http://httpbin.org/patch"
+@app.get("/get", tags=['HTTP Methods'])
+async def the_requests_query_parameters(request: Request):
+    return {'args': {}, 'headers': request.headers, 'origin': request.client.host, 'url': request.url._url}
 
+
+@app.patch("/patch", tags=['HTTP Methods'])
+async def the_requests_patch_parameters(request: Request):
+    response = fill_response(request)
     return response
 
 
-@app.post("/post")
-async def the_requests_post_parameters():
-    response["url"] = "http://httpbin.org/post"
-
+@app.post("/post", tags=['HTTP Methods'])
+async def the_requests_post_parameters(request: Request):
+    response = fill_response(request)
     return response
 
 
-@app.put("/put")
-async def the_requests_put_parameters():
-    response["url"] = "http://httpbin.org/put"
-
+@app.put("/put", tags=['HTTP Methods'])
+async def the_requests_put_parameters(request: Request):
+    response = fill_response(request)
     return response
+
+
+@app.get("/headers", tags=['Request Inspection'])
+async def return_the_incoming_requests_HTTP_headers(request: Request):
+    return {'headers': request.headers}
+
+
+@app.get("/ip", tags=['Request Inspection'])
+async def Returns_the_requesters_IP_Address(request: Request):
+    return {'origin': request.client.host}
+
+
+@app.get("/user-agent", tags=['Request Inspection'])
+async def return_the_incoming_requests_UserAgent_header(request: Request):
+    return {'user-agent': request.headers['user-agent']}
