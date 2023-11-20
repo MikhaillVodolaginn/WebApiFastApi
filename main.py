@@ -62,5 +62,5 @@ async def Returns_the_requesters_IP_Address(request: Request):
 
 
 @app.get("/user-agent", tags=['Request Inspection'])
-async def return_the_incoming_requests_UserAgent_header(request: Request):
+async def return_the_incoming_requests_User_Agent_header(request: Request):
     return {'user-agent': request.headers['user-agent']}
